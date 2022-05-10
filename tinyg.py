@@ -1,15 +1,13 @@
-from cmath import log
-from imghdr import tests
 import serial
 import serial.tools.list_ports as lp
 import time
 from datetime import datetime
 import sys
+import os
 import traceback
 import re
 import math as m
 import threading
-import json
 
 # Define maximums
 XMAX = 17.900
@@ -78,6 +76,12 @@ class tinyg_obj():
     self.ser.flushOutput()
     NotClosed.set()
 
+    ## Remove logs
+    try:
+      os.remove("tinyg.log")
+    except:
+      pass
+
     ## Configure connection specific settings
     self.WriteString("{\"ex\", 2}") ## Add RTS/CTS to the link
     self.ser.rtscts = True
@@ -91,9 +95,6 @@ class tinyg_obj():
     self.r_th.start()
 
     ## Turn off the Solenoid
-    # WriteThreadWrapper("{\"ex\", 2}") ## Add RTS/CTS to the link
-    # self.ser.rtscts = True
-    # WriteThreadWrapper("{\"sr\", 0}") ##turns off status reports
     self.SolenoidOff()
 
   ## Closes the passed serial conenction
@@ -172,20 +173,6 @@ class tinyg_obj():
         pattern = re.compile(r"\\{\"er\":\\{-[a-zA-Z]+\"[^\"]*\"st\":204,\"[a-zA-Z]+\":\"(?:[^\"]|\"\")*\"\\}\\}")
         if (bool(re.match(pattern, line.decode('utf-8')))):
           raise TinygThreadException(line.decode('utf-8'))
-          
-        # try:
-        #   currStringJSON = json.loads(line.decode('utf-8'))
-        #   if 'er' in currStringJSON:
-        #     currStringJSONJSON = json.loads(json.dumps(currStringJSON['er']))
-        #     if 'st' in currStringJSONJSON:
-        #       if currStringJSONJSON['st'] == 204:
-        #         raise TinygThreadException(line.decode('utf-8'))
-
-        #   time.sleep(0.1) ## Added for small timeout on read buffer being empty
-        # except json.JSONDecodeError:
-        #   print("\n..............................JSON ERROR DETECTED...................................")
-        #   print(line.decode('utf-8'))
-        #   continue
 
       ## Print and write to log file
       if(p):
@@ -516,11 +503,11 @@ class tinyg_obj():
       Command = Command + " A" + str(A)
     self.WriteThreadWrapper(Command + "\"}")
 
-  ## Turn on and off the solenoid linear actuator
-  def SolenoidOff(self):
+  ## Turn on and off the spindle pin
+  def SpindleOff(self):
     self.WriteThreadWrapper("{\"gc\":\"M05\"}")
 
-  def SolenoidOn(self):
+  def SpindleOn(self):
     self.WriteThreadWrapper("{\"gc\":\"M03\"}")
 
   # =================================================================================
