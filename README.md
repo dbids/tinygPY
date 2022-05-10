@@ -18,12 +18,13 @@ Next, to use the TinyG effectively, there are over a hundred parameters that mus
 ## Homing
 Homing is the process wherein the machine moves along each axis until it hits one of its two limit switches on that axis. After it hits the switch, it backs off the desired amount (such that the switch is not depressed) and defines that as a zero point along that axis. Outside of homing the two limit switches on each axis are used to stop the machine before it exceeds its bounds. Getting the machine home consistently took time but was a necessary step to ensure that we have consistent coordinates. `Home` homes all axes in the desired order, but homing of a single axis can be done with the `HomeAxis` command. In addition, `SetPosition` does not move the machine, but sets the coordinate of the specified axes to 0 at its current position, useful for rotating axes but not really for us.
 
+## Movement
 Finally, once all these setup functions were complete, a small library of functions needed to be written which given some inputs constructed and sent G-code commands over the serial connection.
 
 * `SavePos1`, `SavePos2`, `GoPos1`, `GoPos2` save a position and return to a saved position respectively.
 * `Jog` moves the machine a small amount using a linear move command and `CancelJog` cancels that move (Warning: not tested).
 * `MoveLinear` moves at a given speed (feed rate) to the absolute coordinates it takes as input. Note that coordinates need to be converted from mm to units the tinyg uses, for which the conversion factors are in config_distance.yml.
 * `MoveRapid` moves at the maximum speed on all specified axes to the absolute coordinates it takes as input. Note that coordinates need to be converted from mm to units the tinyg uses, for which the conversion factors are in config_distance.yml.
-* `SolenoidOn` and `SolenoidOff` turn on an off the pump output, switching the solenoid on or off on the relay.
+* `SpindleOn` and `SpindleOff` turn on an off the spindle output.
 * `GetCurrPos` queries the machine for its current coordinates (at least what the tinyg thinks are its coordinates) and returns them (Warning: not tested).
 * `SoftwareHardReset` sends a signal to clear the error state on the TinyG board which is ASCII 0x24 or ctrl-x.
